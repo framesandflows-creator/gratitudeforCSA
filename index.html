@@ -6,26 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gratitude 2025 | Centre for Social Action 🎄</title>
 
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
 
     <style>
          :root {
-            --glass: rgba(255, 255, 255, .18);
-            --blur: blur(32px);
             --ease: cubic-bezier(.22, 1, .36, 1);
+            --candle: .9;
         }
         /* RESET */
         
         * {
-            box-sizing: border-box;
             margin: 0;
-            padding: 0
+            padding: 0;
+            box-sizing: border-box
         }
+        /* BODY */
         
         body {
             min-height: 100vh;
@@ -34,211 +32,159 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 20px;
             overflow: hidden;
             font-family: "Playfair Display", serif;
         }
-        /* CANDLE GLOW */
+        /* CANDLE */
         
         body::before {
             content: "";
             position: fixed;
             inset: -30%;
-            background: radial-gradient(circle at center, rgba(255, 200, 130, .35), rgba(255, 170, 90, .22), rgba(255, 120, 40, .12), transparent 65%);
-            animation: candlePulse 9s infinite ease-in-out;
+            background: radial-gradient(circle, rgba(255, 200, 130, .35), rgba(255, 170, 90, .22), rgba(255, 120, 40, .12), transparent 65%);
+            opacity: var(--candle);
+            animation: flicker 12s infinite ease-in-out;
             pointer-events: none;
-            z-index: 0;
         }
         
-        body::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(circle at center, transparent 35%, rgba(0, 0, 0, .55) 75%);
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        @keyframes candlePulse {
-            0% {
-                opacity: .85;
-                transform: scale(1)
-            }
+        @keyframes flicker {
             50% {
-                opacity: 1;
-                transform: scale(1.03)
-            }
-            100% {
-                opacity: .9;
-                transform: scale(.99)
+                transform: scale(1.015)
             }
         }
         /* CARD */
         
         .card {
-            position: relative;
-            z-index: 1;
             width: 100%;
-            max-width: 560px;
-            padding: 44px 36px;
-            border-radius: 32px;
+            max-width: 520px;
+            padding: 38px 28px;
+            border-radius: 28px;
             background: linear-gradient(180deg, rgba(255, 255, 255, .26), rgba(255, 255, 255, .06));
-            backdrop-filter: var(--blur) saturate(160%);
-            border: 1px solid var(--glass);
-            box-shadow: 0 55px 140px rgba(0, 0, 0, .6);
+            backdrop-filter: blur(32px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, .18);
+            box-shadow: 0 40px 120px rgba(0, 0, 0, .6);
             text-align: center;
-            animation: enter 1s var(--ease) both;
         }
-        
-        @keyframes enter {
-            from {
-                opacity: 0;
-                transform: translateY(22px)
-            }
-            to {
-                opacity: 1;
-                transform: none
-            }
-        }
-        /* TEXT */
-        
-        .flow {
-            font-size: .7rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            opacity: .75;
-            margin-bottom: 16px;
-        }
-        
-        .subtitle {
-            font-size: .95rem;
-            line-height: 1.7;
-            opacity: .9;
-            margin-bottom: 28px;
-        }
-        /* INPUTS */
-        
-        input,
-        textarea {
-            width: 100%;
-            border-radius: 22px;
-            border: 1px solid rgba(255, 255, 255, .3);
-            padding: 16px 18px;
-            background: rgba(255, 255, 255, .15);
-            color: #fff;
-            margin-bottom: 14px;
-            outline: none;
-        }
-        
-        textarea {
-            min-height: 150px;
-            resize: none
-        }
-        /* BUTTON */
-        
-        button {
-            width: 100%;
-            padding: 16px;
-            border-radius: 26px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            background: linear-gradient(180deg, #fff, #e7e7e7);
-            color: #1a1a1a;
-            margin-top: 14px;
-            transition: .45s var(--ease);
-        }
-        
-        button.drop {
-            animation: drop 1.2s var(--ease) forwards;
-        }
-        
-        @keyframes drop {
-            to {
-                transform: translateY(90px);
-                opacity: 0
-            }
-        }
-        /* STATES */
         
         .preview,
         .send-stage,
         .success {
             display: none
         }
-        /* LETTER — MINIMAL CURSIVE */
+        
+        .flow {
+            font-size: .7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: .75;
+            margin-bottom: 14px
+        }
+        
+        .subtitle {
+            font-size: .9rem;
+            line-height: 1.6;
+            opacity: .9;
+            margin-bottom: 24px
+        }
+        /* INPUTS */
+        
+        input,
+        textarea {
+            width: 100%;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, .3);
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, .15);
+            color: #fff;
+            margin-bottom: 12px;
+        }
+        /* BUTTON */
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 24px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            background: #fff;
+            color: #1a1a1a;
+        }
+        /* LETTER */
         
         .letter {
             background: linear-gradient(180deg, #f7ead1, #e4d1a3);
             color: #4b2e1e;
-            padding: 42px 36px;
-            border-radius: 18px;
+            padding: 34px 28px;
+            border-radius: 16px;
             font-family: "Dancing Script", cursive;
-            font-size: 1.45rem;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            box-shadow: 0 30px 70px rgba(0, 0, 0, .4);
+            font-size: 1.35rem;
+            line-height: 1.65;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .6);
+            position: relative;
+        }
+        /* Paper thickness */
+        
+        .letter::before {
+            content: "";
+            position: absolute;
+            inset: 6px;
+            background: rgba(0, 0, 0, .03);
+            border-radius: 14px;
+            z-index: -1;
+        }
+        /* HANDWRITING */
+        
+        .handwriting {
+            white-space: pre-wrap;
+            border-right: 2px solid rgba(75, 46, 30, .4);
+            animation: caret 1.4s steps(1) infinite;
         }
         
-        .to {
-            font-weight: 500;
-            margin-bottom: 18px;
+        @keyframes caret {
+            50% {
+                border-color: transparent
+            }
         }
-        /* SIGNATURE */
         
-        .signature {
-            margin-top: 26px;
-            text-align: right;
-            font-size: 1.15rem;
-            opacity: .6;
-            font-family: "Dancing Script", cursive;
+        .live-letter {
+            transition: transform 7s var(--ease), opacity 3s var(--ease);
         }
-        /* ENVELOPE SCENE */
+        /* ENVELOPE */
         
         .envelope-scene {
             position: relative;
-            height: 320px;
+            height: 360px;
+            margin-top: 20px;
         }
-        /* GHOST LETTER */
         
-        .ghost-letter {
+        .envelope-message {
             position: absolute;
-            left: 50%;
-            top: -140px;
-            transform: translateX(-50%);
-            width: 240px;
-            padding: 26px 22px;
-            font-family: "Dancing Script", cursive;
-            font-size: 1.25rem;
-            line-height: 1.55;
-            background: linear-gradient(180deg, #f7ead1, #e4d1a3);
-            color: #4b2e1e;
-            border-radius: 14px;
-            box-shadow: 0 18px 40px rgba(0, 0, 0, .35);
-            animation: letterIntoEnvelope 2.6s var(--ease) forwards;
-            z-index: 1;
+            top: 0;
+            width: 100%;
+            text-align: center;
+            font-size: .85rem;
+            opacity: 0;
+            transition: opacity 3s var(--ease);
+            color: rgba(255, 255, 255, .75);
         }
-        /* Envelope shell */
         
         .envelope-shell {
             position: absolute;
-            bottom: 40px;
+            bottom: 28px;
             left: 50%;
             transform: translateX(-50%);
-            width: 280px;
-            height: 180px;
-            overflow: hidden;
+            width: 260px;
+            height: 170px;
             border-radius: 16px;
-            z-index: 2;
-            animation: envelopeDip 0.6s var(--ease) forwards;
-            animation-delay: 2.8s;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .4);
         }
         
         .envelope-body {
             position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background: linear-gradient(180deg, #ead8b8, #d6c2a0);
         }
         
@@ -250,8 +196,7 @@
             background: linear-gradient(180deg, #d2b48c, #c3a77b);
             clip-path: polygon(0 0, 100% 0, 50% 100%);
             transform-origin: top;
-            animation: flapClose 1.8s var(--ease) forwards;
-            animation-delay: 3.2s;
+            transition: transform 5s var(--ease);
         }
         /* SEAL */
         
@@ -262,68 +207,165 @@
             background: #8b1e1e;
             border-radius: 50%;
             left: 50%;
-            bottom: 52px;
-            transform: translateX(-50%) scale(.4);
+            bottom: 46px;
+            transform: translateX(-50%) scale(.15);
             opacity: 0;
-            animation: sealPress 1.2s var(--ease) forwards;
-            animation-delay: 5.2s;
-            z-index: 3;
-        }
-        /* ANIMATIONS */
-        
-        @keyframes letterIntoEnvelope {
-            0% {
-                transform: translate(-50%, -140px)
-            }
-            70% {
-                transform: translate(-50%, 20px)
-            }
-            100% {
-                transform: translate(-50%, 120px)
-            }
+            box-shadow: inset 0 -6px 10px rgba(0, 0, 0, .4), inset 0 4px 6px rgba(255, 255, 255, .25);
+            transition: all 5s var(--ease);
         }
         
-        @keyframes envelopeDip {
-            0% {
-                transform: translateX(-50%) translateY(0) scale(1)
-            }
-            60% {
-                transform: translateX(-50%) translateY(8px) scale(.985)
-            }
-            100% {
-                transform: translateX(-50%) translateY(0) scale(1)
-            }
+        .seal::after {
+            content: "CSA";
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, .5);
         }
+        /* Quote above seal */
         
-        @keyframes flapClose {
-            from {
-                transform: rotateX(0deg)
-            }
-            to {
-                transform: rotateX(180deg)
-            }
-        }
-        
-        @keyframes sealPress {
-            to {
-                transform: translateX(-50%) scale(1);
-                opacity: 1
-            }
+        .seal-quote {
+            position: absolute;
+            bottom: 108px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: .8rem;
+            font-family: "Playfair Display", serif;
+            color: rgba(255, 255, 255, .75);
+            opacity: 0;
+            transition: opacity 3s var(--ease);
         }
         /* SUCCESS */
         
         .success {
-            animation: fadeUp 1.2s var(--ease);
+            animation: fade 2s var(--ease)
         }
         
-        @keyframes fadeUp {
+        @keyframes fade {
             from {
                 opacity: 0;
-                transform: translateY(14px)
+                transform: translateY(16px)
             }
             to {
+                opacity: 1
+            }
+        }
+        /* ================= INTRO OVERLAY ================= */
+        
+        #intro {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            background: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: opacity 2.5s var(--ease);
+        }
+        /* Snow */
+        
+        .intro-snow span {
+            position: absolute;
+            top: -10px;
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+            opacity: .6;
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(110vh)
+            }
+        }
+        /* Santa helpers (minimal silhouettes) */
+        
+        .intro-elf {
+            position: absolute;
+            bottom: 42px;
+            width: 18px;
+            height: 28px;
+            background: linear-gradient(#e11d48, #7f1d1d);
+            border-radius: 4px;
+            opacity: .85;
+            animation: run 9s linear infinite;
+        }
+        
+        .intro-elf::after {
+            content: "✉️";
+            position: absolute;
+            top: -12px;
+            left: -2px;
+            font-size: 12px;
+        }
+        
+        @keyframes run {
+            from {
+                left: -10%
+            }
+            to {
+                left: 110%
+            }
+        }
+        /* Envelope entrance */
+        
+        .intro-envelope {
+            width: 200px;
+            height: 120px;
+            background: linear-gradient(180deg, #ead8b8, #d6c2a0);
+            border-radius: 14px;
+            position: relative;
+            transform: scale(.5) translateY(60px);
+            opacity: 0;
+            animation: envelopeIn 4s var(--ease) forwards;
+        }
+        
+        @keyframes envelopeIn {
+            0% {
+                opacity: 0;
+                transform: scale(.5) translateY(80px)
+            }
+            100% {
                 opacity: 1;
-                transform: none
+                transform: scale(1) translateY(0)
+            }
+        }
+        
+        .intro-envelope::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 55%;
+            background: linear-gradient(180deg, #d2b48c, #c3a77b);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            transform-origin: top;
+            animation: peek 2.5s var(--ease) forwards;
+            animation-delay: 3.2s;
+        }
+        
+        @keyframes peek {
+            to {
+                transform: rotateX(35deg)
+            }
+        }
+        /* Intro text */
+        
+        .intro-text {
+            margin-top: 18px;
+            font-size: .85rem;
+            opacity: .8;
+            animation: fadeIn 3s ease forwards;
+            animation-delay: 2.5s;
+        }
+        
+        @keyframes fadeIn {
+            to {
+                opacity: 1
             }
         }
     </style>
@@ -331,51 +373,64 @@
 
 <body>
 
+    <!-- ===== INTRO OVERLAY ===== -->
+    <div id="intro">
+        <div class="intro-snow" id="introSnow"></div>
+
+        <div class="intro-elf"></div>
+        <div class="intro-elf" style="animation-delay:3s"></div>
+
+        <div class="intro-envelope"></div>
+        <div class="intro-text">Letters are already on their way…</div>
+    </div>
+
+
     <!-- WRITE -->
     <div class="card" id="formBox">
         <div class="flow">Centre for Social Action</div>
         <h1>🎄 Gratitude 2025</h1>
-        <p class="subtitle">Write slowly. Let the words be honest.</p>
-
+        <p class="subtitle">You don’t have to rush this.</p>
         <input id="recipient" placeholder="Who are you grateful for?" />
         <textarea id="message" placeholder="Write your gratitude here…"></textarea>
-
         <button onclick="showPreview()">Preview Letter</button>
     </div>
 
     <!-- PREVIEW -->
     <div class="card preview" id="previewBox">
-        <div class="flow">Read it once</div>
         <div class="letter">
-            <div class="to" id="pTo"></div>
+            <div id="pTo"></div>
             <div id="pMessage"></div>
             <div class="signature">— Centre for Social Action</div>
         </div>
-        <button onclick="backToEdit()">Edit</button>
-        <button id="finalSend" onclick="sendFinal()">Seal & Send</button>
+        <button onclick="sendFinal()">Seal & Send</button>
     </div>
 
     <!-- SEND -->
     <div class="card send-stage" id="sendBox">
+        <div class="letter live-letter handwriting" id="liveLetter"></div>
+
         <div class="envelope-scene">
-            <div class="ghost-letter" id="ghostLetter"></div>
+            <div class="envelope-message" id="envelopeMessage">
+                Take a breath. This moment matters.
+            </div>
 
             <div class="envelope-shell">
                 <div class="envelope-body"></div>
-                <div class="envelope-flap"></div>
+                <div class="envelope-flap" id="flap"></div>
             </div>
 
-            <div class="seal"></div>
+            <div class="seal-quote" id="sealQuote">
+                With gratitude, gently sealed.
+            </div>
+
+            <div class="seal" id="seal"></div>
         </div>
-        <p class="subtitle">Your letter is being sent with care…</p>
     </div>
 
     <!-- SUCCESS -->
     <div class="card success" id="successBox">
-        <h1>🤍 Thank You</h1>
-        <p class="subtitle">
-            Your gratitude is now part of the Centre for Social Action story.
-        </p>
+        <h1>🤍 It has been received</h1>
+        <p class="subtitle">Thank you for taking this moment.</p>
     </div>
 
     <script>
@@ -387,42 +442,91 @@
         const db = firebase.firestore();
 
         function showPreview() {
-            if (!recipient.value || !message.value)
-                return alert("Please fill all fields 🤍");
+            if (!recipient.value || !message.value) return;
             formBox.style.display = "none";
             previewBox.style.display = "block";
             pTo.textContent = "To: " + recipient.value;
             pMessage.textContent = message.value;
         }
 
-        function backToEdit() {
-            previewBox.style.display = "none";
-            formBox.style.display = "block";
+        function typeHandwriting(el, text) {
+            el.innerHTML = "";
+            document.documentElement.style.setProperty('--candle', '1.15');
+            let i = 0;
+            const t = setInterval(() => {
+                el.innerHTML += text[i];
+                i++;
+                if (i >= text.length) {
+                    clearInterval(t);
+                    el.classList.remove("handwriting");
+                }
+            }, 140);
         }
 
         async function sendFinal() {
-            finalSend.classList.add("drop");
+            previewBox.style.display = "none";
+            sendBox.style.display = "block";
+
+            const full = `To: ${recipient.value}\n\n${message.value}\n\n— Centre for Social Action`;
+            typeHandwriting(liveLetter, full);
+
+            const writingTime = full.length * 140;
+
+            // Fold + insert
+            setTimeout(() => {
+                liveLetter.style.transform = "translateY(230px) scale(.72)";
+                liveLetter.style.opacity = "0";
+                envelopeMessage.style.opacity = "1";
+            }, writingTime + 2200);
+
+            // Close envelope
+            setTimeout(() => {
+                envelopeMessage.style.opacity = "0";
+                flap.style.transform = "rotateX(180deg)";
+            }, writingTime + 7200);
+
+            // Seal + quote
+            setTimeout(() => {
+                seal.style.opacity = "1";
+                seal.style.transform = "translateX(-50%) scale(1)";
+                sealQuote.style.opacity = "1";
+                document.documentElement.style.setProperty('--candle', '.85');
+            }, writingTime + 11500);
+
+            // Rest, then close
+            setTimeout(() => {
+                sendBox.style.display = "none";
+                successBox.style.display = "block";
+            }, writingTime + 16500);
 
             await db.collection("messages").add({
                 recipient: recipient.value,
                 message: message.value,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-
-            setTimeout(() => {
-                previewBox.style.display = "none";
-                sendBox.style.display = "block";
-                ghostLetter.innerHTML = `
-      ${message.value}
-      <div class="signature">— Centre for Social Action</div>
-    `;
-            }, 1600);
-
-            setTimeout(() => {
-                sendBox.style.display = "none";
-                successBox.style.display = "block";
-            }, 7800);
         }
+
+        /* ===== INTRO LOGIC ===== */
+
+        // Create snowfall
+        for (let i = 0; i < 40; i++) {
+            const s = document.createElement("span");
+            s.style.left = Math.random() * 100 + "%";
+            s.style.animationDuration = 6 + Math.random() * 6 + "s";
+            document.getElementById("introSnow").appendChild(s);
+        }
+
+        // Fade out intro & reveal app
+        setTimeout(() => {
+            const intro = document.getElementById("intro");
+            if (!intro) return;
+
+            intro.style.opacity = "0";
+
+            setTimeout(() => {
+                intro.remove();
+            }, 2500);
+        }, 8000);
     </script>
 
 </body>
