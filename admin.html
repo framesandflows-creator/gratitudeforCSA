@@ -221,44 +221,61 @@
         };
 
         firebase.initializeApp(firebaseConfig);
+
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        const loginBox = document.getElementById("login");
+        const lettersBox = document.getElementById("letters");
+
         function login() {
-            auth.signInWithEmailAndPassword(email.value, password.value)
-                .catch(() => alert("Access denied"));
+            auth.signInWithEmailAndPassword(
+                email.value,
+                password.value
+            ).catch(() => alert("Access denied"));
         }
 
         auth.onAuthStateChanged(user => {
             if (user) {
-                login.style.display = "none";
+                loginBox.style.display = "none";
                 loadMessages();
             }
         });
 
         function loadMessages() {
-            letters.style.display = "grid";
-            db.collection("messages").orderBy("createdAt", "desc")
+            lettersBox.style.display = "grid";
+
+            db.collection("messages")
+                .orderBy("createdAt", "desc")
                 .onSnapshot(snap => {
-                    letters.innerHTML = "";
+                    lettersBox.innerHTML = "";
+
                     snap.forEach(doc => {
                         const d = doc.data();
                         const tilt = (Math.random() * 6 - 3).toFixed(2);
-                        letters.innerHTML += `
-            <div class="card-wrapper" id="wrap-${doc.id}">
-                <div class="envelope" onclick="openLetter('${doc.id}')">
-                    <div class="to-name">To: ${d.recipient}</div>
-                </div>
 
-                <div class="letter-content">
-                    <div class="letter" style="--tilt:${tilt}deg">
-                        <div class="to">To: ${d.recipient}</div>
-                        <div>${d.message}</div>
-                        <div class="date">${d.createdAt?.toDate().toLocaleDateString("en-IN") || ""}</div>
-                        <button class="export-btn" onclick="exportLetter('${doc.id}')">⬇ Export</button>
-                    </div>
-                </div>
-            </div>`;
+                        lettersBox.innerHTML += `
+                        <div class="card-wrapper" id="wrap-${doc.id}">
+                            <div class="envelope" onclick="openLetter('${doc.id}')">
+                                <div class="to-name">To: ${d.recipient}</div>
+                            </div>
+
+                            <div class="letter-content">
+                                <div class="letter" style="--tilt:${tilt}deg">
+                                    <div class="to">To: ${d.recipient}</div>
+                                    <div>${d.message}</div>
+                                    <div class="date">
+                                        ${d.createdAt
+                                            ? d.createdAt.toDate().toLocaleDateString("en-IN")
+                                            : ""}
+                                    </div>
+                                    <button class="export-btn" onclick="exportLetter('${doc.id}')">
+                                        ⬇ Export
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                     });
                 });
         }
@@ -291,6 +308,7 @@
             document.body.appendChild(s);
         }
     </script>
+
 
 </body>
 
