@@ -53,33 +53,57 @@
         #letters {
             display: none;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 28px;
+            gap: 32px;
         }
-        /* LETTER CARD */
+        /* 🟤 AUTHENTIC OLD LETTER */
         
         .letter {
-            background: linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(255, 255, 255, .9));
-            color: #2b2b2b;
-            padding: 26px 24px 28px;
-            border-radius: 18px;
-            box-shadow: 0 18px 40px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .9);
+            background: radial-gradient(circle at 20% 30%, rgba(139, 69, 19, .18), transparent 40%), radial-gradient(circle at 70% 60%, rgba(160, 82, 45, .15), transparent 45%), linear-gradient(180deg, #f5e6c8, #e6d3a3);
+            color: #4b2e1e;
+            padding: 28px 26px 30px;
+            border-radius: 14px;
+            box-shadow: 0 18px 35px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(90, 60, 30, .25);
             position: relative;
             transform: rotate(var(--tilt));
             transition: transform .25s ease, box-shadow .25s ease;
             font-family: 'Caveat', cursive;
-            font-size: 1.1rem;
-            line-height: 1.5;
+            font-size: 1.15rem;
+            line-height: 1.55;
+        }
+        /* Dark edges / burnt feel */
+        
+        .letter::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            box-shadow: inset 0 0 25px rgba(90, 60, 30, .35);
+            pointer-events: none;
+        }
+        /* Paper fiber texture */
+        
+        .letter::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+            opacity: .35;
+            pointer-events: none;
         }
         
         .letter:hover {
             transform: rotate(0deg) translateY(-6px);
-            box-shadow: 0 28px 60px rgba(0, 0, 0, .35);
+            box-shadow: 0 28px 60px rgba(0, 0, 0, .45);
         }
         
         .letter .to {
             font-weight: 600;
-            margin-bottom: 12px;
-            font-size: 1.15rem;
+            margin-bottom: 14px;
+            font-size: 1.25rem;
+        }
+        
+        .letter .content {
+            white-space: pre-wrap;
         }
         
         .letter .date {
@@ -88,28 +112,20 @@
             opacity: .6;
             text-align: right;
         }
-        
-        .letter::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
-            opacity: .25;
-            pointer-events: none;
-        }
         /* Export button */
         
         .export-btn {
             position: absolute;
-            top: 12px;
-            right: 12px;
-            background: rgba(0, 0, 0, .05);
+            top: 10px;
+            right: 10px;
+            background: rgba(90, 60, 30, .15);
             border: none;
             padding: 6px 10px;
             border-radius: 10px;
             font-size: .75rem;
             cursor: pointer;
-            opacity: .6;
+            opacity: .5;
+            color: #4b2e1e;
             transition: opacity .2s ease, background .2s ease;
         }
         
@@ -118,7 +134,7 @@
         }
         
         .export-btn:hover {
-            background: rgba(0, 0, 0, .1);
+            background: rgba(90, 60, 30, .25);
         }
         /* Snow */
         
@@ -157,7 +173,6 @@
             storageBucket: "csa-christmas-gratitude.firebasestorage.app",
             messagingSenderId: "332897361336",
             appId: "1:332897361336:web:adc36d7ba1a59d26d5034d"
-
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -166,10 +181,8 @@
         const db = firebase.firestore();
 
         function login() {
-            auth.signInWithEmailAndPassword(
-                email.value,
-                password.value
-            ).catch(() => alert("Access denied"));
+            auth.signInWithEmailAndPassword(email.value, password.value)
+                .catch(() => alert("Access denied"));
         }
 
         auth.onAuthStateChanged(user => {
@@ -219,7 +232,7 @@
             const letter = document.getElementById(`letter-${id}`);
 
             html2canvas(letter, {
-                backgroundColor: "#ffffff",
+                backgroundColor: "#f5e6c8",
                 scale: 2
             }).then(canvas => {
                 const link = document.createElement("a");
@@ -229,7 +242,7 @@
             });
         }
 
-        // Snow generator
+        // Snow
         for (let i = 0; i < 40; i++) {
             const snow = document.createElement("div");
             snow.className = "snow";
