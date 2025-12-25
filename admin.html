@@ -55,7 +55,45 @@
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 32px;
         }
-        /* 🟤 AUTHENTIC OLD LETTER */
+        /* ✉️ Envelope */
+        
+        .card-wrapper {
+            position: relative;
+        }
+        
+        .envelope {
+            background: linear-gradient(180deg, #e8d5b5, #d6c2a0);
+            border-radius: 14px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 16px 32px rgba(0, 0, 0, .35);
+            transition: transform .3s ease, box-shadow .3s ease;
+            color: #5a3b23;
+        }
+        
+        .envelope::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 55%;
+            background: linear-gradient(180deg, #d2b48c, #c3a77b);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            border-radius: 14px 14px 0 0;
+        }
+        
+        .envelope:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 26px 50px rgba(0, 0, 0, .45);
+        }
+        
+        .to-name {
+            position: relative;
+            z-index: 1;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        /* 📜 Letter (visual only) */
         
         .letter {
             background: radial-gradient(circle at 20% 30%, rgba(139, 69, 19, .18), transparent 40%), radial-gradient(circle at 70% 60%, rgba(160, 82, 45, .15), transparent 45%), linear-gradient(180deg, #f5e6c8, #e6d3a3);
@@ -63,24 +101,21 @@
             padding: 28px 26px 30px;
             border-radius: 14px;
             box-shadow: 0 18px 35px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(90, 60, 30, .25);
-            position: relative;
-            transform: rotate(var(--tilt));
-            transition: transform .25s ease, box-shadow .25s ease;
             font-family: 'Caveat', cursive;
             font-size: 1.15rem;
             line-height: 1.55;
+            position: relative;
+            transform: rotate(var(--tilt));
         }
-        /* Dark edges / burnt feel */
         
         .letter::before {
             content: "";
             position: absolute;
             inset: 0;
-            border-radius: 14px;
             box-shadow: inset 0 0 25px rgba(90, 60, 30, .35);
+            border-radius: 14px;
             pointer-events: none;
         }
-        /* Paper fiber texture */
         
         .letter::after {
             content: "";
@@ -91,19 +126,10 @@
             pointer-events: none;
         }
         
-        .letter:hover {
-            transform: rotate(0deg) translateY(-6px);
-            box-shadow: 0 28px 60px rgba(0, 0, 0, .45);
-        }
-        
         .letter .to {
             font-weight: 600;
             margin-bottom: 14px;
             font-size: 1.25rem;
-        }
-        
-        .letter .content {
-            white-space: pre-wrap;
         }
         
         .letter .date {
@@ -112,7 +138,32 @@
             opacity: .6;
             text-align: right;
         }
-        /* Export button */
+        /* 🔒 Visibility control */
+        
+        .letter-content {
+            display: none;
+        }
+        
+        .card-wrapper.open .envelope {
+            display: none;
+        }
+        
+        .card-wrapper.open .letter-content {
+            display: block;
+            animation: reveal .4s ease;
+        }
+        
+        @keyframes reveal {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(.98);
+            }
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+        /* Export */
         
         .export-btn {
             position: absolute;
@@ -125,16 +176,10 @@
             font-size: .75rem;
             cursor: pointer;
             opacity: .5;
-            color: #4b2e1e;
-            transition: opacity .2s ease, background .2s ease;
         }
         
-        .letter:hover .export-btn {
+        .letter-content:hover .export-btn {
             opacity: 1;
-        }
-        
-        .export-btn:hover {
-            background: rgba(90, 60, 30, .25);
         }
         /* Snow */
         
@@ -176,7 +221,6 @@
         };
 
         firebase.initializeApp(firebaseConfig);
-
         const auth = firebase.auth();
         const db = firebase.firestore();
 
@@ -187,71 +231,64 @@
 
         auth.onAuthStateChanged(user => {
             if (user) {
-                document.getElementById("login").style.display = "none";
+                login.style.display = "none";
                 loadMessages();
             }
         });
 
         function loadMessages() {
-            const container = document.getElementById("letters");
-            container.style.display = "grid";
-
-            db.collection("messages")
-                .orderBy("createdAt", "desc")
-                .onSnapshot(snapshot => {
-                    container.innerHTML = "";
-
-                    snapshot.forEach(doc => {
+            letters.style.display = "grid";
+            db.collection("messages").orderBy("createdAt", "desc")
+                .onSnapshot(snap => {
+                    letters.innerHTML = "";
+                    snap.forEach(doc => {
                         const d = doc.data();
                         const tilt = (Math.random() * 6 - 3).toFixed(2);
-                        const id = doc.id;
+                        letters.innerHTML += `
+            <div class="card-wrapper" id="wrap-${doc.id}">
+                <div class="envelope" onclick="openLetter('${doc.id}')">
+                    <div class="to-name">To: ${d.recipient}</div>
+                </div>
 
-                        container.innerHTML += `
-                            <div class="letter" id="letter-${id}" style="--tilt:${tilt}deg">
-                                <div class="to">To: ${d.recipient}</div>
-                                <div class="content">${d.message}</div>
-                                <div class="date">
-                                    ${d.createdAt
-                                        ? d.createdAt.toDate().toLocaleDateString("en-IN", {
-                                            day: "numeric",
-                                            month: "short",
-                                            year: "numeric"
-                                        })
-                                        : ""}
-                                </div>
-                                <button class="export-btn" onclick="exportLetter('${id}')">
-                                    ⬇ Export
-                                </button>
-                            </div>
-                        `;
+                <div class="letter-content">
+                    <div class="letter" style="--tilt:${tilt}deg">
+                        <div class="to">To: ${d.recipient}</div>
+                        <div>${d.message}</div>
+                        <div class="date">${d.createdAt?.toDate().toLocaleDateString("en-IN") || ""}</div>
+                        <button class="export-btn" onclick="exportLetter('${doc.id}')">⬇ Export</button>
+                    </div>
+                </div>
+            </div>`;
                     });
                 });
         }
 
-        function exportLetter(id) {
-            const letter = document.getElementById(`letter-${id}`);
+        function openLetter(id) {
+            document.getElementById(`wrap-${id}`).classList.add("open");
+        }
 
-            html2canvas(letter, {
+        function exportLetter(id) {
+            html2canvas(document.querySelector(`#wrap-${id} .letter`), {
                 backgroundColor: "#f5e6c8",
                 scale: 2
-            }).then(canvas => {
-                const link = document.createElement("a");
-                link.download = `CSA_Gratitude_${id}.png`;
-                link.href = canvas.toDataURL("image/png");
-                link.click();
+            }).then(c => {
+                const a = document.createElement("a");
+                a.download = `CSA_Gratitude_${id}.png`;
+                a.href = c.toDataURL("image/png");
+                a.click();
             });
         }
 
-        // Snow
+        /* Snow */
         for (let i = 0; i < 40; i++) {
-            const snow = document.createElement("div");
-            snow.className = "snow";
-            snow.textContent = "❄";
-            snow.style.left = Math.random() * 100 + "vw";
-            snow.style.animationDuration = (Math.random() * 6 + 4) + "s";
-            snow.style.opacity = Math.random();
-            snow.style.fontSize = (Math.random() * 14 + 10) + "px";
-            document.body.appendChild(snow);
+            const s = document.createElement("div");
+            s.className = "snow";
+            s.textContent = "❄";
+            s.style.left = Math.random() * 100 + "vw";
+            s.style.animationDuration = (Math.random() * 6 + 4) + "s";
+            s.style.opacity = Math.random();
+            s.style.fontSize = (Math.random() * 14 + 10) + "px";
+            document.body.appendChild(s);
         }
     </script>
 
