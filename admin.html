@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CSA Gratitude Archive</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body {
+            min-height: 100vh;
+            background: radial-gradient(1000px 600px at top, rgba(255, 255, 255, .08), transparent 60%), linear-gradient(180deg, #050b1f, #0b2540);
+            color: #fff;
+            font-family: 'Playfair Display', serif;
+            padding: 60px 40px;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 40px;
+        }
+        
+        #login {
+            max-width: 360px;
+            margin: 120px auto;
+            text-align: center;
+        }
+        
+        #login input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: none;
+            margin-bottom: 14px;
+            font-size: 1rem;
+        }
+        
+        #login button {
+            padding: 14px 22px;
+            border-radius: 18px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        #letters {
+            display: none;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 28px;
+        }
+        /* LETTER CARD */
+        
+        .letter {
+            background: linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(255, 255, 255, .9));
+            color: #2b2b2b;
+            padding: 26px 24px 28px;
+            border-radius: 18px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .9);
+            position: relative;
+            transform: rotate(var(--tilt));
+            transition: transform .25s ease, box-shadow .25s ease;
+            font-family: 'Caveat', cursive;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        
+        .letter:hover {
+            transform: rotate(0deg) translateY(-6px);
+            box-shadow: 0 28px 60px rgba(0, 0, 0, .35);
+        }
+        
+        .letter .to {
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 1.15rem;
+        }
+        
+        .letter .date {
+            margin-top: 18px;
+            font-size: .8rem;
+            opacity: .6;
+            text-align: right;
+        }
+        
+        .letter::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+            opacity: .25;
+            pointer-events: none;
+        }
+        /* Export button */
+        
+        .export-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, .05);
+            border: none;
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: .75rem;
+            cursor: pointer;
+            opacity: .6;
+            transition: opacity .2s ease, background .2s ease;
+        }
+        
+        .letter:hover .export-btn {
+            opacity: 1;
+        }
+        
+        .export-btn:hover {
+            background: rgba(0, 0, 0, .1);
+        }
+        /* Snow */
+        
+        .snow {
+            position: fixed;
+            top: -10px;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(110vh);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎄 CSA Gratitude Letters</h1>
+
+    <div id="login">
+        <input id="email" placeholder="Admin email">
+        <input id="password" type="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div id="letters"></div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfg-H64wDdxB4NOpfSDVzY9z-iUxaT7gI",
+            authDomain: "csa-christmas-gratitude.firebaseapp.com",
+            projectId: "csa-christmas-gratitude",
+            storageBucket: "csa-christmas-gratitude.firebasestorage.app",
+            messagingSenderId: "332897361336",
+            appId: "1:332897361336:web:adc36d7ba1a59d26d5034d"
+
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        function login() {
+            auth.signInWithEmailAndPassword(
+                email.value,
+                password.value
+            ).catch(() => alert("Access denied"));
+        }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById("login").style.display = "none";
+                loadMessages();
+            }
+        });
+
+        function loadMessages() {
+            const container = document.getElementById("letters");
+            container.style.display = "grid";
+
+            db.collection("messages")
+                .orderBy("createdAt", "desc")
+                .onSnapshot(snapshot => {
+                    container.innerHTML = "";
+
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        const tilt = (Math.random() * 6 - 3).toFixed(2);
+                        const id = doc.id;
+
+                        container.innerHTML += `
+                            <div class="letter" id="letter-${id}" style="--tilt:${tilt}deg">
+                                <div class="to">To: ${d.recipient}</div>
+                                <div class="content">${d.message}</div>
+                                <div class="date">
+                                    ${d.createdAt
+                                        ? d.createdAt.toDate().toLocaleDateString("en-IN", {
+                                            day: "numeric",
+                                            month: "short",
+                                            year: "numeric"
+                                        })
+                                        : ""}
+                                </div>
+                                <button class="export-btn" onclick="exportLetter('${id}')">
+                                    ⬇ Export
+                                </button>
+                            </div>
+                        `;
+                    });
+                });
+        }
+
+        function exportLetter(id) {
+            const letter = document.getElementById(`letter-${id}`);
+
+            html2canvas(letter, {
+                backgroundColor: "#ffffff",
+                scale: 2
+            }).then(canvas => {
+                const link = document.createElement("a");
+                link.download = `CSA_Gratitude_${id}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+
+        // Snow generator
+        for (let i = 0; i < 40; i++) {
+            const snow = document.createElement("div");
+            snow.className = "snow";
+            snow.textContent = "❄";
+            snow.style.left = Math.random() * 100 + "vw";
+            snow.style.animationDuration = (Math.random() * 6 + 4) + "s";
+            snow.style.opacity = Math.random();
+            snow.style.fontSize = (Math.random() * 14 + 10) + "px";
+            document.body.appendChild(snow);
+        }
+    </script>
+
+</body>
+
+</html>
