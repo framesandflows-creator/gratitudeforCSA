@@ -318,26 +318,34 @@
         /* RENDER */
         function render(list) {
             lettersBox.innerHTML = "";
+
             list.forEach(d => {
                 lettersBox.innerHTML += `
-    <div class="card-wrapper" onclick="this.classList.add('open')">
-      <div class="envelope">
-        <div class="to-name">To: ${d.recipient}</div>
-      </div>
+        <div class="card-wrapper" id="wrap-${d.id}">
+            
+            <div class="envelope" onclick="openLetter('${d.id}')">
+                <div class="to-name">To: ${d.recipient}</div>
+            </div>
 
-      <div class="letter-content">
-        <div class="letter">
-          <button class="delete-btn"
-            onclick="event.stopPropagation(); deleteLetter('${d.id}')">🗑</button>
-          <button class="export-btn"
-            onclick="event.stopPropagation(); exportLetter('${d.id}')">⬇</button>
-          <div><strong>To:</strong> ${d.recipient}</div>
-          <div>${d.message}</div>
-        </div>
-      </div>
-    </div>`;
+            <div class="letter-content">
+                <div class="letter" id="letter-${d.id}">
+                    
+                    <button class="delete-btn"
+                        onclick="handleDelete(event, '${d.id}')">🗑</button>
+
+                    <button class="export-btn"
+                        onclick="handleExport(event, '${d.id}')">⬇</button>
+
+                    <div><strong>To:</strong> ${d.recipient}</div>
+                    <div>${d.message}</div>
+
+                </div>
+            </div>
+
+        </div>`;
             });
         }
+
 
         /* SEARCH */
         search.addEventListener("input", () => {
@@ -351,23 +359,210 @@
         }
 
         /* EXPORT */
-        function exportLetter(id) {
-            const letter = document.querySelector(`[onclick*="${id}"] .letter`);
+        function exportLetter(event, id) {
+            event.stopPropagation();
+
+            const letter = document.getElementById(`letter-${id}`);
+            if (!letter) return;
+
             html2canvas(letter, {
-                scale: 2
-            }).then(c => {
+                scale: 2,
+                backgroundColor: "#f5e6c8"
+            }).then(sourceCanvas => {
+
+                const padding = 40;
+                const bottomSpace = 90;
+
+                const w = sourceCanvas.width + padding * 2;
+                const h = sourceCanvas.height + padding * 2 + bottomSpace;
+
+                const canvas = document.createElement("canvas");
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext("2d");
+
+                /* ===== POLAROID BACKGROUND ===== */
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, w, h);
+
+                /* ===== SHADOW ===== */
+                ctx.shadowColor = "rgba(0,0,0,0.25)";
+                ctx.shadowBlur = 30;
+                ctx.shadowOffsetY = 12;
+
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(
+                    padding - 10,
+                    padding - 10,
+                    sourceCanvas.width + 20,
+                    sourceCanvas.height + 20
+                );
+
+                ctx.shadowColor = "transparent";
+
+                /* ===== DRAW LETTER ===== */
+                ctx.drawImage(
+                    sourceCanvas,
+                    padding,
+                    padding
+                );
+
+                /* ===== CAPTION TEXT ===== */
+                ctx.fillStyle = "#444";
+                ctx.font = "20px 'Playfair Display', serif";
+                ctx.textAlign = "center";
+                ctx.fillText(
+                    "CSA Gratitude · 2025",
+                    w / 2,
+                    h - 35
+                );
+
+                /* ===== EXPORT ===== */
                 const a = document.createElement("a");
-                a.download = "CSA_Gratitude.png";
-                a.href = c.toDataURL("image/png");
+                a.download = `CSA_Gratitude_Polaroid_${id}.png`;
+                a.href = canvas.toDataURL("image/png");
                 a.click();
             });
         }
 
-        /* DELETE */
-        function deleteLetter(id) {
-            if (confirm("Delete this gratitude letter?")) {
-                db.collection("messages").doc(id).delete();
-            }
+        function openLetter(id) {
+            document.getElementById(`wrap-${id}`).classList.add("open");
+        }
+
+        /* ✅ DOWNLOAD — POLAROID STYLE */
+        function handleExport(event, id) {
+            event.stopPropagation();
+
+            const letter = document.getElementById(`letter-${id}`);
+            if (!letter) return;
+
+            const exportBtn = letter.querySelector(".export-btn");
+            const deleteBtn = letter.querySelector(".delete-btn");
+
+            /* Hide UI controls */
+            exportBtn.style.visibility = "hidden";
+            deleteBtn.style.visibility = "hidden";
+
+            html2canvas(letter, {
+                scale: 2.2,
+                backgroundColor: "#f5e6c8"
+            }).then(sourceCanvas => {
+
+                const padding = 110;
+                const w = sourceCanvas.width + padding * 2;
+                const h = sourceCanvas.height + padding * 2;
+
+                const canvas = document.createElement("canvas");
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext("2d");
+
+                /* ===== BASE PAPER ===== */
+                const paperGrad = ctx.createLinearGradient(0, 0, 0, h);
+                paperGrad.addColorStop(0, "#fbf6ea");
+                paperGrad.addColorStop(1, "#efe2c7");
+                ctx.fillStyle = paperGrad;
+                ctx.fillRect(0, 0, w, h);
+
+                /* ===== COARSE PAPER GRAIN ===== */
+                for (let i = 0; i < 2200; i++) {
+                    ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.03})`;
+                    ctx.fillRect(
+                        Math.random() * w,
+                        Math.random() * h,
+                        1,
+                        1
+                    );
+                }
+
+                /* ===== MICRO FIBERS ===== */
+                for (let i = 0; i < 1400; i++) {
+                    ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.015})`;
+                    ctx.fillRect(
+                        Math.random() * w,
+                        Math.random() * h,
+                        1,
+                        1
+                    );
+                }
+
+                /* ===== DRAW LETTER WITH SOFT INK BLEED ===== */
+                ctx.globalAlpha = 0.94;
+                ctx.drawImage(sourceCanvas, padding, padding);
+                ctx.globalAlpha = 1;
+
+                /* ===== POSTCARD BORDER ===== */
+                ctx.strokeStyle = "rgba(120,90,50,0.35)";
+                ctx.lineWidth = 4;
+                ctx.strokeRect(32, 32, w - 64, h - 64);
+
+                /* ===== DIVIDER LINE ===== */
+                ctx.strokeStyle = "rgba(90,60,30,0.28)";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(w * 0.64, padding);
+                ctx.lineTo(w * 0.64, h - padding);
+                ctx.stroke();
+
+                /* ===== CSA STAMP (IMPERFECT) ===== */
+                const stampX = w - 205 + Math.random() * 6;
+                const stampY = 60 + Math.random() * 6;
+
+                ctx.strokeStyle = "rgba(95,55,30,0.75)";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(stampX, stampY, 135, 155);
+
+                ctx.fillStyle = "rgba(95,55,30,0.7)";
+                ctx.font = "18px 'Playfair Display', serif";
+                ctx.textAlign = "center";
+                ctx.fillText("CSA", stampX + 67, stampY + 65);
+                ctx.font = "13px 'Playfair Display', serif";
+                ctx.fillText("Gratitude", stampX + 67, stampY + 90);
+                ctx.fillText("2025", stampX + 67, stampY + 110);
+
+                /* ===== AGED EDGE VIGNETTE ===== */
+                const vignette = ctx.createRadialGradient(
+                    w / 2, h / 2, Math.min(w, h) * 0.35,
+                    w / 2, h / 2, Math.max(w, h) * 0.8
+                );
+                vignette.addColorStop(0, "rgba(0,0,0,0)");
+                vignette.addColorStop(0.65, "rgba(90,60,30,0.18)");
+                vignette.addColorStop(1, "rgba(45,25,10,0.45)");
+                ctx.fillStyle = vignette;
+                ctx.fillRect(0, 0, w, h);
+
+                /* ===== MICRO DUST & STAINS ===== */
+                for (let i = 0; i < 400; i++) {
+                    ctx.fillStyle = `rgba(80,60,40,${Math.random() * 0.05})`;
+                    ctx.fillRect(
+                        Math.random() * w,
+                        Math.random() * h,
+                        Math.random() * 2,
+                        Math.random() * 2
+                    );
+                }
+
+                /* ===== FINAL DOWNLOAD ===== */
+                const a = document.createElement("a");
+                a.download = `CSA_Gratitude_Postcard_${id}.png`;
+                a.href = canvas.toDataURL("image/png");
+                a.click();
+
+                /* Restore buttons */
+                exportBtn.style.visibility = "";
+                deleteBtn.style.visibility = "";
+            });
+        }
+
+
+        /* ✅ DELETE */
+        function handleDelete(event, id) {
+            event.stopPropagation();
+
+            if (!confirm("Delete this gratitude letter?")) return;
+
+            db.collection("messages").doc(id).delete()
+                .catch(() => alert("Delete failed"));
         }
     </script>
 
