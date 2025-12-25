@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Christmas Gratitude | Centre for Social Action 🎄</title>
+
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+    <style>
+         :root {
+            --glass: rgba(255, 255, 255, .18);
+            --white-soft: rgba(255, 255, 255, .85);
+            --blur: blur(28px);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+        
+        body {
+            min-height: 100vh;
+            background: radial-gradient(1200px 600px at top, rgba(255, 255, 255, .08), transparent 60%), linear-gradient(180deg, #050b1f, #0b2540);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+        }
+        /* Snow */
+        
+        .snow {
+            position: fixed;
+            top: -10px;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(110vh)
+            }
+        }
+        /* Decorations */
+        
+        .star,
+        .santa {
+            position: absolute;
+            opacity: .5;
+            filter: blur(.6px);
+        }
+        
+        .star.left {
+            top: 14%;
+            left: 6%;
+            font-size: 36px;
+        }
+        
+        .star.right {
+            bottom: 18%;
+            right: 8%;
+            font-size: 38px;
+        }
+        
+        .santa {
+            bottom: -20px;
+            right: -20px;
+            font-size: 90px;
+            opacity: .6;
+        }
+        /* Glow Wrapper */
+        
+        .glow-wrapper {
+            position: relative;
+        }
+        
+        .glow-wrapper::before {
+            content: "";
+            position: absolute;
+            inset: -90px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 215, 130, .35), transparent 40%), radial-gradient(circle at 70% 60%, rgba(180, 200, 255, .3), transparent 45%);
+            filter: blur(70px);
+            z-index: -1;
+        }
+        /* Card */
+        
+        .card {
+            max-width: 560px;
+            width: 100%;
+            padding: 38px 32px;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, .06));
+            backdrop-filter: var(--blur) saturate(160%);
+            box-shadow: 0 40px 90px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .35);
+            border: 1px solid var(--glass);
+            text-align: center;
+            animation: fadeUp .6s ease both;
+        }
+        
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px)
+            }
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+        /* Text */
+        
+        .org {
+            font-size: .75rem;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            opacity: .9;
+            margin-bottom: 6px;
+        }
+        
+        .space {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+        
+        .subtitle {
+            font-size: .95rem;
+            line-height: 1.6;
+            opacity: .85;
+            margin-bottom: 28px;
+        }
+        /* Inputs */
+        
+        input,
+        textarea {
+            width: 100%;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, .25);
+            padding: 16px 18px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, .15);
+            color: #fff;
+            outline: none;
+        }
+        
+        input {
+            margin-bottom: 14px
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: none
+        }
+        
+         ::placeholder {
+            color: rgba(255, 255, 255, .65)
+        }
+        
+        input:focus,
+        textarea:focus {
+            border-color: rgba(255, 255, 255, .5);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, .15);
+        }
+        /* Button */
+        
+        button {
+            margin-top: 26px;
+            width: 100%;
+            padding: 16px;
+            font-size: 1rem;
+            border-radius: 22px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            background: linear-gradient(180deg, #fff, #e6e6e6);
+            color: #1a1a1a;
+            box-shadow: 0 14px 32px rgba(0, 0, 0, .28);
+            transition: transform .15s ease, opacity .15s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-1px)
+        }
+        
+        button:disabled {
+            opacity: .6;
+            cursor: not-allowed
+        }
+        
+        .footer {
+            margin-top: 18px;
+            font-size: .75rem;
+            opacity: .7;
+        }
+        
+        .success {
+            display: none
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="star left">⭐</div>
+    <div class="star right">✨</div>
+    <div class="santa">🎄</div>
+
+    <div class="glow-wrapper">
+        <div class="card" id="formBox">
+            <div class="org">Centre for Social Action</div>
+            <div class="space">A Season of Gratitude & Compassion</div>
+
+            <h1>🎄 Christmas Gratitude</h1>
+            <p class="subtitle">
+                This Christmas, pause and express gratitude — for kindness received, support felt, or the people who quietly make the world gentler through their actions.
+            </p>
+
+            <input id="recipient" placeholder="Who are you grateful for?" />
+            <textarea id="message" placeholder="Write your message of gratitude, appreciation, or encouragement…"></textarea>
+
+            <button id="sendBtn">Share Gratitude 🤍</button>
+
+            <p class="footer">
+                Small words of gratitude can create lasting impact.
+            </p>
+        </div>
+    </div>
+
+    <div class="card success" id="successBox">
+        <h1>🤍 Gratitude Shared</h1>
+        <p class="subtitle">
+            Your message has been sent. May the spirit of compassion and care continue to grow this Christmas.
+        </p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+
+
+    <script>
+        emailjs.init("L04En7o58gBFV2dpO");
+
+        const formBox = document.getElementById("formBox");
+        const successBox = document.getElementById("successBox");
+        const sendBtn = document.getElementById("sendBtn");
+        const recipientInput = document.getElementById("recipient");
+        const messageInput = document.getElementById("message");
+
+        sendBtn.addEventListener("click", async() => {
+            const recipient = recipientInput.value.trim();
+            const message = messageInput.value.trim();
+
+            if (!recipient || !message) {
+                alert("Please fill both fields 🤍");
+                return;
+            }
+
+            sendBtn.disabled = true;
+            sendBtn.textContent = "Saving…";
+
+            try {
+                await db.collection("messages").add({
+                    recipient,
+                    message,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                formBox.style.display = "none";
+                successBox.style.display = "block";
+            } catch (err) {
+                alert("Something went wrong. Please try again.");
+                sendBtn.disabled = false;
+                sendBtn.textContent = "Share Gratitude 🤍";
+            }
+        });
+
+
+        // Snow generator
+        for (let i = 0; i < 50; i++) {
+            const snow = document.createElement("div");
+            snow.className = "snow";
+            snow.textContent = "❄";
+            snow.style.left = Math.random() * 100 + "vw";
+            snow.style.animationDuration = (Math.random() * 6 + 4) + "s";
+            snow.style.opacity = Math.random();
+            snow.style.fontSize = (Math.random() * 14 + 10) + "px";
+            document.body.appendChild(snow);
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfg-H64wDdxB4NOpfSDVzY9z-iUxaT7gI",
+            authDomain: "csa-christmas-gratitude.firebaseapp.com",
+            projectId: "csa-christmas-gratitude",
+            storageBucket: "csa-christmas-gratitude.firebasestorage.app",
+            messagingSenderId: "332897361336",
+            appId: "1:332897361336:web:adc36d7ba1a59d26d5034d"
+
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
+
+</body>
+
+</html>
